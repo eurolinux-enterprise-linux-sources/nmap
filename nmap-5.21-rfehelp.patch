@@ -1,0 +1,19 @@
+diff -up nmap-5.21/nmap.cc.rfeman nmap-5.21/nmap.cc
+--- nmap-5.21/nmap.cc.rfeman	2011-06-30 12:36:13.255317947 +0200
++++ nmap-5.21/nmap.cc	2011-06-30 12:36:13.276318079 +0200
+@@ -219,6 +219,7 @@ printf("%s %s ( %s )\n"
+        "  -PS/PA/PU/PY[portlist]: TCP SYN/ACK, UDP or SCTP discovery to given ports\n"
+        "  -PE/PP/PM: ICMP echo, timestamp, and netmask request discovery probes\n"
+        "  -PO[protocol list]: IP Protocol Ping\n"
++       "  -PR: ARP ping - does not need HW address -> IP translation\n"
+        "  -n/-R: Never do DNS resolution/Always resolve [default: sometimes]\n"
+        "  --dns-servers <serv1[,serv2],...>: Specify custom DNS servers\n"
+        "  --system-dns: Use OS's DNS resolver\n"
+@@ -241,6 +242,7 @@ printf("%s %s ( %s )\n"
+        "  --port-ratio <ratio>: Scan ports more common than <ratio>\n"
+        "SERVICE/VERSION DETECTION:\n"
+        "  -sV: Probe open ports to determine service/version info\n"
++       "  -sR: Check what service uses opened ports using RPC scan\n"
+        "  --version-intensity <level>: Set from 0 (light) to 9 (try all probes)\n"
+        "  --version-light: Limit to most likely probes (intensity 2)\n"
+        "  --version-all: Try every single probe (intensity 9)\n"
