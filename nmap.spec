@@ -2,7 +2,7 @@
 Summary: Network exploration tool and security scanner
 Name: nmap
 Version: 5.51
-Release: 4%{?dist}
+Release: 6%{?dist}
 # nmap is GPLv2
 # zenmap is GPLv2 and LGPLv2+ (zenmap/higwidgets) and GPLv2+ (zenmap/radialnet)
 # libdnet-stripped is BSD (advertising clause rescinded by the Univ. of California in 1999) with some parts as Public Domain (crc32)
@@ -31,6 +31,9 @@ Patch4: nmap-5.21-rfehelp.patch
 Patch5: zenmap-621887-workaround.patch
 Patch6: nmap-5.51-udpfix.patch
 Patch7: nmap-6.40-logdebug.patch
+
+# rhbz#1284866 for nmap <= 7.12
+Patch8: nmap-5.51-tcpdns.patch
 
 URL: http://nmap.org/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -71,6 +74,7 @@ be installed before installing nmap front end.
 %patch5 -p1 -b .bz637403
 %patch6 -p1 -b .udpfix
 %patch7 -p1 -b .logdebug
+%patch8 -p1 -b .tcpdns
 
 #be sure we're not using tarballed copies of some libraries
 rm -rf liblua libpcap libpcre macosx mswin32
@@ -187,6 +191,12 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/xnmap.1.gz
 
 %changelog
+* Wed Oct 26 2016 Michal Hlavinka <mhlavink@redhat.com> - 2:5.51-6
+- update previous patch (#1284866)
+
+* Wed Jul 27 2016 Michal Hlavinka <mhlavink@redhat.com> - 2:5.51-5
+- when DNS response is truncated requery over TCP (#1284866)
+
 * Mon May 05 2014 Michal Hlavinka <mhlavink@redhat.com> - 2:5.51-4
 - ncat: do not print debug messages during normal use (#1000770)
 
