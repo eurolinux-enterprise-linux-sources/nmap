@@ -1,8 +1,8 @@
 #TODO: stop using local copy of libdnet, once system distributed version supports sctp (grep sctp /usr/include/dnet.h)
 Summary: Network exploration tool and security scanner
 Name: nmap
-Version: 5.21
-Release: 4%{?dist}
+Version: 5.51
+Release: 2%{?dist}
 # nmap is GPLv2
 # zenmap is GPLv2 and LGPLv2+ (zenmap/higwidgets) and GPLv2+ (zenmap/radialnet)
 # libdnet-stripped is BSD (advertising clause rescinded by the Univ. of California in 1999) with some parts as Public Domain (crc32)
@@ -27,6 +27,9 @@ Patch3: nmap-4.68-nostrip.patch
 #add -sR and -PR to --help output
 Patch4: nmap-5.21-rfehelp.patch
 
+# rhbz#637403, workaround for rhbz#621887=gnome#623965
+Patch5: zenmap-621887-workaround.patch
+
 URL: http://nmap.org/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Epoch: 2
@@ -41,7 +44,11 @@ ping scanning (determine which hosts are up), many port scanning techniques
 (determine what services the hosts are offering), and TCP/IP fingerprinting
 (remote host operating system identification). Nmap also offers flexible target
 and port specification, decoy scanning, determination of TCP sequence
-predictability characteristics, reverse-identd scanning, and more.
+predictability characteristics, reverse-identd scanning, and more. In addition
+to the classic command-line nmap executable, the Nmap suite includes a flexible
+data transfer, redirection, and debugging tool (netcat utility ncat), a utility
+for comparing scan results (ndiff), and a packet generation and response analysis
+tool (nping). 
 
 %package frontend
 Summary: The GTK+ front end for nmap
@@ -59,6 +66,7 @@ be installed before installing nmap front end.
 %patch2 -p1 -b .noms
 %patch3 -p1 -b .nostrip
 %patch4 -p1 -b .rfehelp
+%patch5 -p1 -b .bz637403
 
 #be sure we're not using tarballed copies of some libraries
 rm -rf liblua libpcap libpcre macosx mswin32
@@ -69,12 +77,18 @@ sed -i -e "s|^locale_dir =.*$|locale_dir = os.path.join('share','locale')|" \
  -e 's|join(self.install_data, data_dir)|join(self.install_data, "share")|' zenmap/setup.py
 sed -i 's|^LOCALE_DIR = .*|LOCALE_DIR = join(prefix, "share", "locale")|' zenmap/zenmapCore/Paths.py
 
+#fix jp->ja locale
+sed -i '/ALL_LINGUAS =/s/jp/ja/' Makefile.in
+mv docs/man-xlate/nmap-jp.1 docs/man-xlate/nmap-ja.1
 
 %build
 export CFLAGS="$RPM_OPT_FLAGS"
 export CXXFLAGS="$RPM_OPT_FLAGS"
 %configure  --with-libpcap=/usr
 make %{?_smp_mflags}
+
+#fix man page (rhbz#813734)
+sed -i 's/-md/-mf/' nping/docs/nping.1
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -120,6 +134,18 @@ popd
 %find_lang nmap --with-man
 %find_lang zenmap
 
+%post frontend
+touch --no-create %{_datadir}/icons/hicolor &>/dev/null || :
+
+%postun frontend
+if [ $1 -eq 0 ] ; then
+    touch --no-create %{_datadir}/icons/hicolor &>/dev/null
+    gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
+fi
+
+%posttrans frontend
+gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -131,11 +157,13 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/nmap
 %{_bindir}/ncat
 %{_bindir}/ndiff
+%{_bindir}/nping
 %{_mandir}/man1/ndiff.1.gz
 %{_mandir}/man1/nmap.1.gz
 %{_mandir}/man1/ncat.1.gz
-%{_datadir}/nmap
+%{_mandir}/man1/nping.1.gz
 %{_datadir}/ncat
+%{_datadir}/nmap
 
 %files frontend -f zenmap.lang
 %defattr(-,root,root)
@@ -147,13 +175,20 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/xnmap
 %{python_sitelib}/*
 %{_datadir}/applications/nmap-zenmap.desktop
-%{_datadir}/icons/*
+%{_datadir}/icons/hicolor/*
 %{_datadir}/zenmap
 %{_mandir}/man1/zenmap.1.gz
 %{_mandir}/man1/nmapfe.1.gz
 %{_mandir}/man1/xnmap.1.gz
 
 %changelog
+* Fri Apr 27 2012 Michal Hlavinka <mhlavink@redhat.com> - 2:5.51-2
+- fix typo in nping man page (#813734)
+
+* Mon Feb 13 2012 Michal Hlavinka <mhlavink@redhat.com> - 2:5.51-1
+- update nmap to improve performance (#512042)
+- fix missing debuginfo files (#729045)
+
 * Thu Jun 30 2011 Michal Hlavinka <mhlavink@redhat.com> - 2:5.21-4
 - add -sR and -PR options to --help output (#621045)
 
