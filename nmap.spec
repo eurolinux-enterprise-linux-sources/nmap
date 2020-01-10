@@ -2,7 +2,7 @@
 Summary: Network exploration tool and security scanner
 Name: nmap
 Version: 5.51
-Release: 3%{?dist}
+Release: 4%{?dist}
 # nmap is GPLv2
 # zenmap is GPLv2 and LGPLv2+ (zenmap/higwidgets) and GPLv2+ (zenmap/radialnet)
 # libdnet-stripped is BSD (advertising clause rescinded by the Univ. of California in 1999) with some parts as Public Domain (crc32)
@@ -30,6 +30,7 @@ Patch4: nmap-5.21-rfehelp.patch
 # rhbz#637403, workaround for rhbz#621887=gnome#623965
 Patch5: zenmap-621887-workaround.patch
 Patch6: nmap-5.51-udpfix.patch
+Patch7: nmap-6.40-logdebug.patch
 
 URL: http://nmap.org/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -69,6 +70,7 @@ be installed before installing nmap front end.
 %patch4 -p1 -b .rfehelp
 %patch5 -p1 -b .bz637403
 %patch6 -p1 -b .udpfix
+%patch7 -p1 -b .logdebug
 
 #be sure we're not using tarballed copies of some libraries
 rm -rf liblua libpcap libpcre macosx mswin32
@@ -185,6 +187,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/xnmap.1.gz
 
 %changelog
+* Mon May 05 2014 Michal Hlavinka <mhlavink@redhat.com> - 2:5.51-4
+- ncat: do not print debug messages during normal use (#1000770)
+
 * Tue May 21 2013 Michal Hlavinka <mhlavink@redhat.com> - 2:5.51-3
 - prevent debuginfo stripping (#729045)
 - ncat did not write UDP data to output file (#826601)
@@ -212,7 +217,7 @@ rm -rf $RPM_BUILD_ROOT
 * Tue Jan 12 2010 Michal Hlavinka <mhlavink@redhat.com> - 2:5.00-6
 - use sqlite3 (instead of sqlite2)
 
-* Mon Dec 01 2009 Michal Hlavinka <mhlavink@redhat.com> - 2:5.00-5
+* Tue Dec 01 2009 Michal Hlavinka <mhlavink@redhat.com> - 2:5.00-5
 - spec cleanup
 
 * Mon Nov 02 2009 Michal Hlavinka <mhlavink@redhat.com> - 2:5.00-4
@@ -322,7 +327,7 @@ rm -rf $RPM_BUILD_ROOT
 * Fri Dec 09 2005 Jesse Keating <jkeating@redhat.com>
 - rebuilt
 
-* Tue Nov 11 2005 Harald Hoyer <harald@redhat.com> - 2:3.93-3
+* Fri Nov 11 2005 Harald Hoyer <harald@redhat.com> - 2:3.93-3
 - fixed wrong __attribute__ test
 
 * Thu Nov 10 2005 Tomas Mraz <tmraz@redhat.com> - 2:3.93-2
@@ -374,7 +379,7 @@ rm -rf $RPM_BUILD_ROOT
 * Tue Sep 23 2003 Florian La Roche <Florian.LaRoche@redhat.de>
 - allow disabling frontend if gtk1 is not available
 
-* Mon Jul 30 2003 Harald Hoyer <harald@redhat.de> 2:3.30-1
+* Wed Jul 30 2003 Harald Hoyer <harald@redhat.de> 2:3.30-1
 - version 3.30
 
 * Wed Jun 04 2003 Elliot Lee <sopwith@redhat.com>
