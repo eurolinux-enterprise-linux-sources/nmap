@@ -2,7 +2,7 @@
 Summary: Network exploration tool and security scanner
 Name: nmap
 Version: 5.51
-Release: 2%{?dist}
+Release: 3%{?dist}
 # nmap is GPLv2
 # zenmap is GPLv2 and LGPLv2+ (zenmap/higwidgets) and GPLv2+ (zenmap/radialnet)
 # libdnet-stripped is BSD (advertising clause rescinded by the Univ. of California in 1999) with some parts as Public Domain (crc32)
@@ -29,6 +29,7 @@ Patch4: nmap-5.21-rfehelp.patch
 
 # rhbz#637403, workaround for rhbz#621887=gnome#623965
 Patch5: zenmap-621887-workaround.patch
+Patch6: nmap-5.51-udpfix.patch
 
 URL: http://nmap.org/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -67,6 +68,7 @@ be installed before installing nmap front end.
 %patch3 -p1 -b .nostrip
 %patch4 -p1 -b .rfehelp
 %patch5 -p1 -b .bz637403
+%patch6 -p1 -b .udpfix
 
 #be sure we're not using tarballed copies of some libraries
 rm -rf liblua libpcap libpcre macosx mswin32
@@ -93,7 +95,8 @@ sed -i 's/-md/-mf/' nping/docs/nping.1
 %install
 rm -rf $RPM_BUILD_ROOT
 
-make DESTDIR=$RPM_BUILD_ROOT install
+# setting STRIP to 'true' binary prevents debuginfo stripping (#729045)
+make STRIP=true DESTDIR=$RPM_BUILD_ROOT install
 rm -f $RPM_BUILD_ROOT%{_bindir}/uninstall_zenmap
 
 #use consolehelper
@@ -182,6 +185,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/xnmap.1.gz
 
 %changelog
+* Tue May 21 2013 Michal Hlavinka <mhlavink@redhat.com> - 2:5.51-3
+- prevent debuginfo stripping (#729045)
+- ncat did not write UDP data to output file (#826601)
+
 * Fri Apr 27 2012 Michal Hlavinka <mhlavink@redhat.com> - 2:5.51-2
 - fix typo in nping man page (#813734)
 
