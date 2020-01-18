@@ -4,7 +4,7 @@ Name: nmap
 Epoch: 2
 Version: 6.40
 #global prerelease %{nil}
-Release: 4%{?dist}
+Release: 7%{?dist}
 # nmap is GPLv2
 # zenmap is GPLv2 and LGPLv2+ (zenmap/higwidgets) and GPLv2+ (zenmap/radialnet)
 # libdnet-stripped is BSD (advertising clause rescinded by the Univ. of California in 1999) with some parts as Public Domain (crc32)
@@ -33,6 +33,12 @@ Patch4: zenmap-621887-workaround.patch
 Patch5: ncat_reg_stdin.diff
 Patch6: nmap-6.25-displayerror.patch
 Patch7: nmap-6.40-mantypo.patch
+
+# not upstream yet, rhbz#1134412
+Patch8: nmap-6.40-logdebug.patch
+
+# sent upstream, for nmap <= 6.49, rhbz#1192143
+Patch9: nmap-6.40-allresolve.patch
 
 URL: http://nmap.org/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -90,6 +96,8 @@ uses.
 %patch5 -p1 -b .ncat_reg_stdin
 %patch6 -p1 -b .displayerror
 %patch7 -p1 -b .mantypo
+%patch8 -p1 -b .logdebug
+%patch9 -p1 -b .allresolve
 
 #be sure we're not using tarballed copies of some libraries, 
 #we remove them when creating our own tarball, just check they are not present
@@ -113,7 +121,7 @@ sed -i 's|^LOCALE_DIR = .*|LOCALE_DIR = join(prefix, "share", "locale")|' zenmap
 %build
 export CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing"
 export CXXFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing"
-%configure  --with-libpcap=/usr
+%configure  --with-libpcap=/usr --without-nmap-update
 make %{?_smp_mflags}
 
 #fix man page (rhbz#813734)
@@ -225,6 +233,16 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/xnmap.1.gz
 
 %changelog
+* Thu Jul 30 2015 Michal Hlavinka <mhlavink@redhat.com> - 2:6.40-7
+- explicitely disable modules we don't want to build to have consistent results (#1246453)
+
+* Tue Jul 07 2015 Michal Hlavinka <mhlavink@redhat.com> - 2:6.40-6
+- fix coverity found issue (#1192143)
+
+* Fri Jul 03 2015 Michal Hlavinka <mhlavink@redhat.com> - 2:6.40-5
+- ncat should try to connect to all resolved addresses, not only the first one (#1192143)
+- do not print debug messages during normal use (#1134412)
+
 * Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 2:6.40-4
 - Mass rebuild 2014-01-24
 
