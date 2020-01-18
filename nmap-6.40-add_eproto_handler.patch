@@ -1,0 +1,12 @@
+diff --git a/nsock/src/nsock_core.c b/nsock/src/nsock_core.c
+index ec38cad..1261c83 100644
+--- a/nsock/src/nsock_core.c
++++ b/nsock/src/nsock_core.c
+@@ -350,6 +350,7 @@ void handle_connect_result(mspool *ms, msevent *nse, enum nse_status status) {
+       case ETIMEDOUT:
+       case EHOSTDOWN:
+       case ECONNRESET:
++      case EPROTO:
+ #ifdef WIN32
+       case WSAEADDRINUSE:
+       case WSAEADDRNOTAVAIL:

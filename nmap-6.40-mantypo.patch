@@ -1,0 +1,33 @@
+diff -up nmap-6.40/docs/nmap.1.mantypo nmap-6.40/docs/nmap.1
+--- nmap-6.40/docs/nmap.1.mantypo	2013-08-09 18:09:13.569139528 +0200
++++ nmap-6.40/docs/nmap.1	2013-08-09 18:09:24.616044416 +0200
+@@ -174,7 +174,7 @@ SCRIPT SCAN:
+   \-\-script\-trace: Show all data sent and received
+   \-\-script\-updatedb: Update the script database\&.
+   \-\-script\-help=<Lua scripts>: Show help about scripts\&.
+-           <Lua scripts> is a comma separted list of script\-files or
++           <Lua scripts> is a comma separated list of script\-files or
+            script\-categories\&.
+ OS DETECTION:
+   \-O: Enable OS detection
+diff -up nmap-6.40/nping/docs/nping.1.mantypo nmap-6.40/nping/docs/nping.1
+--- nmap-6.40/nping/docs/nping.1.mantypo	2013-08-09 18:09:37.655932148 +0200
++++ nmap-6.40/nping/docs/nping.1	2013-08-09 18:09:49.382831186 +0200
+@@ -1425,7 +1425,7 @@ The following paragraphs describe the di
+ .RS 4
+ This option tells Nping to run as an Echo client\&.
+ \fIpassphrase\fR
+-is a sequence of ASCII characters that is used used to generate the cryptographic keys needed for encryption and authentication in a given session\&. The passphrase should be a secret that is also known by the server, and it may contain any number of printable ASCII characters\&. Passphrases that contain whitespace or special characters must be enclosed in double quotes\&.
++is a sequence of ASCII characters that is used to generate the cryptographic keys needed for encryption and authentication in a given session\&. The passphrase should be a secret that is also known by the server, and it may contain any number of printable ASCII characters\&. Passphrases that contain whitespace or special characters must be enclosed in double quotes\&.
+ .sp
+ When running Nping as an Echo client, most options from the regular raw probe modes apply\&. The client may be configured to send specific probes using flags like
+ \fB\-\-tcp\fR,
+@@ -1441,7 +1441,7 @@ or
+ .RS 4
+ This option tells Nping to run as an Echo server\&.
+ \fIpassphrase\fR
+-is a sequence of ASCII characters that is used used to generate the cryptographic keys needed for encryption and authentication in a given session\&. The passphrase should be a secret that is also known by the clients, and it may contain any number of printable ASCII characters\&. Passphrases that contain whitespace or special characters must be enclosed in double quotes\&. Note that although it is not recommended, it is possible to use empty passphrases, supplying
++is a sequence of ASCII characters that is used to generate the cryptographic keys needed for encryption and authentication in a given session\&. The passphrase should be a secret that is also known by the clients, and it may contain any number of printable ASCII characters\&. Passphrases that contain whitespace or special characters must be enclosed in double quotes\&. Note that although it is not recommended, it is possible to use empty passphrases, supplying
+ \fB\-\-echo\-server ""\fR\&. However, if what you want is to set up an open Echo server, it is better to use option
+ \fB\-\-no\-crypto\fR\&. See below for details\&.
+ .RE
