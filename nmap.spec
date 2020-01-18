@@ -8,7 +8,7 @@ Version: 6.40
 ## https://bugzilla.redhat.com/1460249
 %global ncat_version 7.50
 #global prerelease %{nil}
-Release: 16%{?dist}
+Release: 19%{?dist}
 # nmap is GPLv2
 # zenmap is GPLv2 and LGPLv2+ (zenmap/higwidgets) and GPLv2+ (zenmap/radialnet)
 # libdnet-stripped is BSD (advertising clause rescinded by the Univ. of California in 1999) with some parts as Public Domain (crc32)
@@ -64,6 +64,8 @@ Patch13: nmap-6.40-add_eproto_handler.patch
 Patch14: nmap-6.40-ncat_early_error_reporting.patch
 Patch16: nmap-use_after_free.patch
 Patch17: nmap-7.60-udp_remoteaddr.patch
+Patch18: nmap-6.40-nsock_param.patch
+Patch19: nmap-ipv6_literal_proxy.patch
 
 
 URL: http://nmap.org/
@@ -113,6 +115,12 @@ applications and users. Ncat will not only work with IPv4 and IPv6
 but provides the user with a virtually limitless number of potential
 uses.
 
+%if 0%{?rhel} && 0%{?rhel}  >= 0
+Requires(post): %{_sbindir}/update-alternatives
+Requires(postun): %{_sbindir}/update-alternatives
+%endif
+
+
 
 %prep
 %setup -q -n %{name}-%{version}%{?prerelease}
@@ -147,6 +155,8 @@ tar -xf %{SOURCE4}
 %patch13 -p1 -b .eproto
 %patch16 -p1 -b .use-after-free
 %patch17 -p1 -b .udp_ra
+%patch18 -p1 -b .nsock-params
+%patch19 -p1 -b .proxy-literal
 
 #be sure we're not using tarballed copies of some libraries,
 #we remove them when creating our own tarball, just check they are not present
@@ -203,9 +213,14 @@ ln -s zenmap.1.gz nmapfe.1.gz
 ln -s zenmap.1.gz xnmap.1.gz
 popd
 
-#we provide 'nc' replacement
+
+%if 0%{?fedora} && 0%{?fedora}  >= 0
+# we provide 'nc' replacement
+# Do not create symlinks on manpages on rhel because of
+# rhbz#1578776
 ln -s ncat.1.gz $RPM_BUILD_ROOT%{_mandir}/man1/nc.1.gz
 ln -s ncat $RPM_BUILD_ROOT%{_bindir}/nc
+%endif
 
 desktop-file-install --vendor nmap \
 	--dir $RPM_BUILD_ROOT%{_datadir}/applications \
@@ -229,6 +244,10 @@ popd
 %find_lang nmap --with-man
 %find_lang zenmap
 
+touch %{buildroot}%{_bindir}/nc
+
+
+
 %post frontend
 touch --no-create %{_datadir}/icons/hicolor &>/dev/null || :
 
@@ -240,6 +259,19 @@ fi
 
 %posttrans frontend
 gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
+
+%post ncat
+%{_sbindir}/update-alternatives --install %{_bindir}/nc \
+  %{name} %{_bindir}/ncat 10 \
+  --slave %{_mandir}/man1/nc.1.gz ncman %{_mandir}/man1/ncat.1.gz  
+
+## ln -s ncat.1.gz $RPM_BUILD_ROOT%{_mandir}/man1/nc.1.gz
+
+%postun ncat
+if [ $1 -eq 0 ] ; then
+  %{_sbindir}/update-alternatives --remove %{name} %{_bindir}/ncat
+fi
+
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -260,9 +292,14 @@ rm -rf $RPM_BUILD_ROOT
 %files ncat 
 %defattr(-,root,root)
 %doc COPYING ncat/docs/AUTHORS ncat/docs/README ncat/docs/THANKS ncat/docs/examples
+%if 0%{?fedora} && 0%{?fedora}  >= 0
 %{_bindir}/nc
-%{_bindir}/ncat
 %{_mandir}/man1/nc.1.gz
+%else
+%ghost %{_bindir}/nc
+%ghost %{_mandir}/man1/nc.1.gz
+%endif
+%{_bindir}/ncat
 %{_mandir}/man1/ncat.1.gz
 
 %files frontend -f zenmap.lang
@@ -282,6 +319,12 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/xnmap.1.gz
 
 %changelog
+* Tue Feb  5 2019 Pavel Zhukov <pzhukov@redhat.com> - 2:6.40-19
+- Resolves: #1591959 - Fix ipv6 literal parsing
+
+* Mon Jan  7 2019 Pavel Zhukov <pzhukov@redhat.com> - 2:6.40-17
+- Resolves: #1597611 - Do not crash in case of nsock parameters errors
+
 * Mon Jun  4 2018 Pavel Zhukov <pzhukov@redhat.com> - 2:6.40-16
 - Resolves: #1573411 - Populate ncat env. variables in UDP mode
 
