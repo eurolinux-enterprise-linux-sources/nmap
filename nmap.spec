@@ -8,7 +8,7 @@ Version: 6.40
 ## https://bugzilla.redhat.com/1460249
 %global ncat_version 7.50
 #global prerelease %{nil}
-Release: 13%{?dist}
+Release: 16%{?dist}
 # nmap is GPLv2
 # zenmap is GPLv2 and LGPLv2+ (zenmap/higwidgets) and GPLv2+ (zenmap/radialnet)
 # libdnet-stripped is BSD (advertising clause rescinded by the Univ. of California in 1999) with some parts as Public Domain (crc32)
@@ -58,9 +58,13 @@ Patch10: nmap-6.40-trancated_dns.patch
 %if  "%{ncat_version}" != "%{version}"
 Patch11: nmap-6.40-ncat_%{ncat_version}.patch
 Patch12: nmap-6.40-ncat_memleak.patch
+Patch15: nmap-6.40-ncat_default_proxy_port.patch
 %endif
 Patch13: nmap-6.40-add_eproto_handler.patch
 Patch14: nmap-6.40-ncat_early_error_reporting.patch
+Patch16: nmap-use_after_free.patch
+Patch17: nmap-7.60-udp_remoteaddr.patch
+
 
 URL: http://nmap.org/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -132,6 +136,7 @@ tar -xf %{SOURCE4}
 # Patch for newer/older ncat
 %patch11 -p1 -b .ncatrebase
 %patch12 -p1 -b .memleak
+%patch15 -p1 -b .socksport
 %else
 # Patches which were accepted upstream and not needed in rebased version
 %patch8 -p1 -b .logdebug
@@ -140,6 +145,8 @@ tar -xf %{SOURCE4}
 
 %patch14 -p1 -b .errorreporting
 %patch13 -p1 -b .eproto
+%patch16 -p1 -b .use-after-free
+%patch17 -p1 -b .udp_ra
 
 #be sure we're not using tarballed copies of some libraries,
 #we remove them when creating our own tarball, just check they are not present
@@ -275,6 +282,16 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/xnmap.1.gz
 
 %changelog
+* Mon Jun  4 2018 Pavel Zhukov <pzhukov@redhat.com> - 2:6.40-16
+- Resolves: #1573411 - Populate ncat env. variables in UDP mode
+
+* Wed Apr 25 2018 Pavel Zhukov <pzhukov@redhat.com> - 2:6.40-15
+- Resolves: #1525105 - Fix use after free error (Coverity)
+- Patches renumbered
+
+* Tue Apr  3 2018 Pavel Zhukov <pzhukov@redhat.com> - 2:6.40-14
+- Resolves: #1546246 - Don't use http proxy port for socks proxies
+
 * Wed Nov  8 2017 Pavel Zhukov <pzhukov@redhat.com> - 2:6.40-13
 - Resolves: #1436402 - nc from nmap ncat crash if ipv6 disabled
 
